@@ -21,11 +21,13 @@ public class Stopwatch extends Application {
     Button rightButton;
     Button leftButton;
     Text time;
-    int minute;
-    int second;
+    int minute = 0;
+    int second = 0;
+    int milliseconds = 0;
     Circle circle;
     Box circle2;
     Boolean isRunning = false;
+    Timeline timer;
 
 
     @Override
@@ -49,7 +51,7 @@ public class Stopwatch extends Application {
         Scene scene = new Scene(root, 800, 600);
 
         // Clock face
-        time = new Text("0");
+        time = new Text("0:0:0");
         time.setTextAlignment(TextAlignment.CENTER);
         time.setWrappingWidth(100);
         time.setStyle("-fx-font-size: 24px;");
@@ -80,6 +82,10 @@ public class Stopwatch extends Application {
         stage.setTitle("Homepage");
         stage.setScene(scene);
         stage.show();
+
+        // Initialize the timer
+        timer = new Timeline(new KeyFrame(Duration.millis(10), event -> incrementTime()));
+        timer.setCycleCount(Timeline.INDEFINITE);
     }
 
     public static void main(String[] args) {
@@ -91,29 +97,33 @@ public class Stopwatch extends Application {
         isRunning = true;
         leftButton.setText("Lap");
         rightButton.setText("Stop");
-        rightButton.setOnAction(e -> {
-            isRunning = false;
-            stopStopwatch();
-        });
-
-        // To-Do : Implement the stopwatch
-        if(isRunning){
-            incrementTime();
-            Timeline timer = new Timeline(
-                    new KeyFrame(Duration.seconds(1), event -> startStopwatch())
-            );
-            timer.play();
-            startStopwatch();
-        }
+        rightButton.setOnAction(e -> stopStopwatch());
+        timer.play();
     }
 
     private void incrementTime() {
-        int currentTime = parseInt(time.getText());
-        time.setText(String.valueOf(currentTime + 1));
+        String times[] = time.getText().split(":");
+        minute = parseInt(times[0]);
+        second = parseInt(times[1]);
+        milliseconds = parseInt(times[2]);
+        if (milliseconds == 99) {
+            second++;
+            milliseconds = 0;
+        } else {
+            milliseconds++;
+        }
+
+        if(second == 60){
+            minute++;
+            second = 0;
+        }
+        String newTime = minute + ":" + second + ":" + milliseconds;
+        time.setText(newTime);
     }
 
     // Stop the stopwatch
     public void stopStopwatch() {
+        timer.stop();
         leftButton.setText("Reset");
         leftButton.setOnAction(e -> resetStopwatch());
         rightButton.setText("Continue");
@@ -122,9 +132,7 @@ public class Stopwatch extends Application {
 
     // Reset the stopwatch
     public void resetStopwatch() {
-//        minute = 00;
-//        second = 00;
-        time.setText("0");
+        time.setText("0:0:0");
         rightButton.setText("Start");
     }
 
