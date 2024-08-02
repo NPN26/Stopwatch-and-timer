@@ -1,5 +1,7 @@
 package org.example.stopwatch;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,6 +12,9 @@ import javafx.scene.shape.Box;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import static java.lang.Integer.parseInt;
 
 public class Stopwatch extends Application {
     GridPane root;
@@ -20,6 +25,8 @@ public class Stopwatch extends Application {
     int second;
     Circle circle;
     Box circle2;
+    Boolean isRunning = false;
+
 
     @Override
     public void start(Stage stage) {
@@ -81,17 +88,35 @@ public class Stopwatch extends Application {
 
     // Start the stopwatch
     public void startStopwatch() {
+        isRunning = true;
         leftButton.setText("Lap");
         rightButton.setText("Stop");
-        rightButton.setOnAction(e -> stopStopwatch());
-        time.setText("1");
+        rightButton.setOnAction(e -> {
+            isRunning = false;
+            stopStopwatch();
+        });
+
+        // To-Do : Implement the stopwatch
+        if(isRunning){
+            incrementTime();
+            Timeline timer = new Timeline(
+                    new KeyFrame(Duration.seconds(1), event -> startStopwatch())
+            );
+            timer.play();
+            startStopwatch();
+        }
+    }
+
+    private void incrementTime() {
+        int currentTime = parseInt(time.getText());
+        time.setText(String.valueOf(currentTime + 1));
     }
 
     // Stop the stopwatch
     public void stopStopwatch() {
         leftButton.setText("Reset");
         leftButton.setOnAction(e -> resetStopwatch());
-        rightButton.setText("Start");
+        rightButton.setText("Continue");
         rightButton.setOnAction(e -> startStopwatch());
     }
 
@@ -100,6 +125,10 @@ public class Stopwatch extends Application {
 //        minute = 00;
 //        second = 00;
         time.setText("0");
+        rightButton.setText("Start");
+    }
 
+    public boolean isCounting(){
+        return parseInt(time.getText())>0;
     }
 }
